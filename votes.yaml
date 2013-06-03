@@ -1,0 +1,4 @@
+- ballot: [Chattanooga, Memphis, Nashville, Knoxville]
+  count: 106
+- ballot: [Memphis, Nashville, Knoxville, Chattanooga]
+  count: 87

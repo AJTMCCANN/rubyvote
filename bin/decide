@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift(File.expand_path("../..", __FILE__))
+
+require 'decider'
+require 'yaml'
+require 'pp'
+require 'optparse'
+
+flags = {system: :condorcet}
+
+OptionParser.new do |opts|
+  opts.on("-s", "--system=VOTING_SYSTEM", "Select voting system") do |system|
+    flags[:system] = system.to_sym
+  end
+end.parse!
+#removes any flags it recognizes from ARGV
+#--help is build in!!! thanks to OptParse
+
+vote_data = YAML.load(ARGF.read)
+
+puts "Total preference groups: #{vote_data.size}"
+total_votes = vote_data.reduce(0) { |count, preference_group| preference_group["count"] + count }
+puts "Total votes: #{total_votes}"
+
+options = vote_data.each_with_object([]) { |preference_group, all_options|
+  all_options.concat(preference_group["ballot"])
+}.uniq
+
+#can avoid uniq by using sets
+
+#implies return of original object, unlike reduce/inject
+
+pp options
+
+electorate = VoteProcessing.build_electorate(options, total_votes) do |electorate|
+  vote_data.each do |preference_group|
+    electorate.add_preference_group(preference_group["ballot"], preference_group["count"])
+  end
+end
+
+electorate.voting_system = flags[:system]
+
+@bush = Decider.new
+outcome = @bush.activate_decider(electorate)
+puts outcome
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#uses ARGV then STDIN if ARGV is empty
+
+
+
